@@ -1,10 +1,14 @@
 #include <iostream>
 #include <chrono>
+#include <vector>
 
 using namespace std;  
 using namespace std::chrono; // Avoiding long types
 
-double** processComputation(double **matrixA, double **matrixB,double **matrixC, int nrows, int ncols);
+vector<vector<double>> matrixC;
+
+int nrows,ncols;
+void processComputation(double *matrixA, double *matrixB);
 
 int main(int argc, char **argv)
 {
@@ -13,29 +17,23 @@ int main(int argc, char **argv)
         return (-1);
     }
 
-    int nrows = atoi(argv[1]);
-    int ncols = atoi(argv[2]);
+    nrows = atoi(argv[1]);
+    ncols = atoi(argv[2]);
 
     // Allocate memory for the fist matrix and create pointer for data access
-    double **A = new double*[nrows]; // A vector of nrwos elements. Each element is a pointer to double data
-    for (size_t i=0; i < nrows; i++)
-        A[i] = new double[ncols]; // A vecto od ncols elements. Each elemnt is a double. 
+    double *A = new double[nrows*ncols]; // A vector of nrwos elements. Each element is a pointer to double data
 
     // Allocate memory for the second matrix
-    double **B = new double*[nrows]; // A vector of nrwos elements. Each element is a pointer to double data
-    for (size_t i=0; i < nrows; i++)
-        B[i] = new double[ncols]; 
+    double *B = new double[nrows*ncols]; // A vector of nrwos elements. Each element is a pointer to double data
 
     // Allocate memory for the result 
-    double **C = new double*[nrows]; // A vector of nrwos elements. Each element is a pointer to double data
-    for (size_t i=0; i < nrows; i++)
-        C[i] = new double[ncols]; 
+    matrixC.resize(nrows, vector<double>(ncols));
 
     // Initialize values for A and B
     for (size_t i=0; i<nrows; i++) {
         for (size_t j=0; j<ncols; j++) {
-            A[i][j] = static_cast<double> (rand()) /static_cast<double> (RAND_MAX); // Obser haw bidimensional data is addressed
-            B[i][j] = static_cast<double> (rand()) /static_cast<double> (RAND_MAX); // Obser haw bidimensional data is addressed 
+            A[i*ncols+j] = static_cast<double> (rand()) /static_cast<double> (RAND_MAX); // Obser haw bidimensional data is addressed
+            B[i*ncols+j] = static_cast<double> (rand()) /static_cast<double> (RAND_MAX); // Obser haw bidimensional data is addressed 
         }
     }
 
@@ -44,7 +42,7 @@ int main(int argc, char **argv)
     auto start = high_resolution_clock::now();
  
     // Computation
-    C = processComputation(A, B, C, nrows, ncols);
+    processComputation(A, B);
     // Annotate finishing time
     auto stop = high_resolution_clock::now(); // auto deduces the type from the initialization expression
 
@@ -54,17 +52,16 @@ int main(int argc, char **argv)
 
     cout << "Time taken by function: "
          << elapsed.count() << " seconds" << endl;
-    delete C;
+    matrixC.clear(); // Clear content by mivector is kept
     return 0;
     
 }
 
-double** processComputation(double **matrixA, double **matrixB,double **matrixC, int nrows, int ncols){
+void processComputation(double *matrixA, double *matrixB){
        // Computation
     for (size_t i=0; i<nrows; i++) {
         for (size_t j=0; j<ncols; j++) {
-            matrixC[i][j] = matrixA[i][j] + matrixB[i][j];
+            matrixC[i][j] = matrixA[i*ncols+j] + matrixB[i*ncols+j];
         }
     }
-    return matrixC;
 }
